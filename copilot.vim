@@ -4,9 +4,13 @@
 
 scriptencoding utf-8
 
-let s:spc = g:airline_symbols.space
-let emoji_working1 = "[|]"
-let emoji_working2 = "[-]"
+" truncate the newline char
+function! System(cmd)
+  return system(a:cmd)[:-2]
+endfunction
+
+let g:emoji_working1 = "[|]"
+let g:emoji_working2 = "[-]"
 
 if !exists("g:loaded_copilot")
   finish
@@ -14,9 +18,12 @@ endif
 
 function! airline#extensions#copilot#check(...) abort
     let logfile = copilot#logger#File()
-    let requestnumber = system("tail " . logfile . "| grep -n 'fetchCompletions' | cut -d':' -f1 | tail -1")
-    let responsenumber = system("tail " . logfile . "| grep -n 'request.response' | cut -d':' -f1 | tail -1")
-    echo "Copilot: " . requestnumber . " requests, " . responsenumber . " responses"
+    let requestnumber = System("tail " . logfile . "| grep -n 'fetchCompletions' | cut -d':' -f1 | tail -1")
+    let responsenumber = System("tail " . logfile . "| grep -n 'request.response' | cut -d':' -f1 | tail -1")
+    if str2nr(requestnumber) > str2nr(responsenumber)
+      return g:emoji_working2
+    else
+      return g:emoji_working1
 endfunction
 
 function! airline#extensions#copilot#init(ext) abort
